@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Libra Extension Example</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+      body {
+          background-color:#F0F0F0;
+          padding: 2em;
+          font-family: 'Roboto', sans-serif;
+      }
+      .container {
+          width: 50%;
+          margin: 0 auto;
+      }
+      label {
+          display:block;
+          margin-bottom:10px;
+      }
+      input {
+          padding:10px;
+          width: 50%;
+          margin-bottom: 1em;
+      }
+      button {
+          margin: 2em 0;
+          padding: 1em 4em;
+          display:block;
+      }
+      .status {
+          color: red
+      }
+      .complete {
+          color:green
+      }
+      .logo {
+          height: 32px;
+      }
+    </style>  
+  </head>
+  <body>
+    <!-- Form -->
+    <div class="container">
+        <h1>Libra Extension Example <a href="https://github.com/apemon/libra-wallet-web-extension" target="_blank"><img src="github.png" class="logo" /></a></h1>
+        <h3>Please install Libra Wallet POC Chrome Extension and unlock your wallet before continue</h3>
+        <h2>Your Address = <span id="address"></span></h2>
+        <h2>Balance = <span id="balance"></span></h2>
+        <button id="button" style="display: block" onclick="javascript:getWalletInfo()">Get Wallet Info</button>
+        <h3 id="walletStatus" class="status"></h3>
+        <hr/>
+        <br/>
+        <h2>Press button to donate 10 testnet libra to address: c4d04d41ea1453db808e2e3a559f49a39d78fcefd6b87ebd41a0440b6017ff79</h2>
+        <button id="button" style="display: inline-block" onclick="javascript:donate()">Donate 10 Lib</button>
+        <h3 id="donateStatus" class="status"></h3>
+        <h3 id="completeStatus" class="complete"></h3>
+        <a id="explorer" href="" target="_blank"></a>
+        <br/>
+        <br/>
+    </div>
+  </body>
+  <script>
+    async function getWalletInfo() {
+      try {
+        if(typeof window.libra === 'undefined')
+          throw err = 'NOT_INSTALLED'
+        let account = await window.libra.getAccount()
+        let balance = await window.libra.getBalance()
+        document.getElementById('address').textContent = account
+        document.getElementById('balance').textContent = balance
+        document.getElementById('walletStatus').textContent = ''
+      } catch (err) {
+        if(err == 'LOCKED') {
+          document.getElementById('walletStatus').textContent = 'Wallet is locked, please unlock it first :P'
+        } else if(err == 'NOT_INSTALLED') {
+          document.getElementById('walletStatus').textContent = 'Unable to detect Libra Wallet Extension :('
+        }
+      }
+    }
+
+    async function donate() {
+      try {
+        if(typeof window.libra === 'undefined')
+          throw err = 'NOT_INSTALLED'
+        let result = await window.libra.transfer('c4d04d41ea1453db808e2e3a559f49a39d78fcefd6b87ebd41a0440b6017ff79', 10)
+        document.getElementById('donateStatus').textContent = ''
+        document.getElementById('completeStatus').textContent = 'Thank you for donation :D, you can check your transaction at :'
+        let link = document.getElementById('explorer')
+        link.href = result.explorerLink
+        link.textContent = result.explorerLink
+        getWalletInfo()
+      } catch (err) {
+        if(err == 'LOCKED') {
+          document.getElementById('donateStatus').textContent = 'Wallet is locked, please unlock it first :P'
+        } else if(err == 'NOT_INSTALLED') {
+          document.getElementById('donateStatus').textContent = 'Unable to detect Libra Wallet Extension :('
+        }
+      }
+    }
+      
+  </script>
+</html>
